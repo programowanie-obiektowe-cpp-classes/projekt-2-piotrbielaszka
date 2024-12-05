@@ -14,12 +14,12 @@ using namespace tinyxml2;
 class Osoba
 {
 private:
-    string             imie;
-    string             nazwisko;
-    vector< Kontakt* > dane_kontaktowe;
+    string                          imie;
+    string                          nazwisko;
+    vector< shared_ptr< Kontakt > > dane_kontaktowe;
 
 public:
-    Osoba(string Imie, string Nazwisko, vector< Kontakt* > DaneKontaktowe)
+    Osoba(string Imie, string Nazwisko, vector< shared_ptr< Kontakt > > DaneKontaktowe)
         : imie(Imie), nazwisko(Nazwisko), dane_kontaktowe(DaneKontaktowe)
     {
         if (!sprawdz_poprawnosc())
@@ -45,14 +45,14 @@ public:
     string get_nazwisko() { return nazwisko; }
     string get_nazwa() { return (imie + " " + nazwisko); }
 
-    void add_Kontakt(Kontakt* k) { dane_kontaktowe.push_back(k); }
+    void add_Kontakt(shared_ptr< Kontakt > k) { dane_kontaktowe.push_back(k); }
 
-    vector< Kontakt* > get_dane_kontaktowe() { return dane_kontaktowe; }
+    vector< shared_ptr< Kontakt > > get_dane_kontaktowe() { return dane_kontaktowe; }
 
     void print()
     {
         cout << get_nazwa() << "\n";
-        for (Kontakt* k : dane_kontaktowe)
+        for (shared_ptr< Kontakt > k : dane_kontaktowe)
         {
             k->print();
         }
@@ -101,7 +101,7 @@ public:
             el = doc.NewElement("Osoba");
             el->SetAttribute("Imie", o.get_imie().c_str());
             el->SetAttribute("Nazwisko", o.get_nazwisko().c_str());
-            for (Kontakt* k : o.get_dane_kontaktowe())
+            for (shared_ptr< Kontakt > k : o.get_dane_kontaktowe())
             {
                 el->InsertEndChild(k->getXML(root));
             }
@@ -136,7 +136,7 @@ public:
 
                         Osoba o     = Osoba(imie, nazwisko);
                         xml_kontakt = xml_osoba->FirstChildElement();
-                        Kontakt* k;
+                        shared_ptr< Kontakt > k;
                         while (xml_kontakt != nullptr)
                         {
                             xml_value = xml_kontakt->Value();
@@ -144,7 +144,7 @@ public:
                             {
                                 try
                                 {
-                                    k = new Telefon(xml_kontakt->GetText());
+                                    k = make_shared< Telefon >(xml_kontakt->GetText());
                                 }
                                 catch (exception ex)
                                 {
@@ -155,7 +155,7 @@ public:
                             {
                                 try
                                 {
-                                    k = new Email(xml_kontakt->GetText());
+                                    k = make_shared< Email >(xml_kontakt->GetText());
                                 }
                                 catch (exception ex)
                                 {
@@ -166,7 +166,7 @@ public:
                             {
                                 try
                                 {
-                                    k = new Faks(xml_kontakt->GetText());
+                                    k = make_shared< Faks >(xml_kontakt->GetText());
                                 }
                                 catch (exception ex)
                                 {
@@ -182,10 +182,10 @@ public:
                                 {
                                     try
                                     {
-                                        k = new AdresPolski(xml_kontakt->Attribute("Ulica"),
-                                                            xml_kontakt->Attribute("Miasto"),
-                                                            xml_kontakt->Attribute("NumerBudynku"),
-                                                            xml_kontakt->Attribute("KodPocztowy"));
+                                        k = make_shared< AdresPolski >(xml_kontakt->Attribute("Ulica"),
+                                                                       xml_kontakt->Attribute("Miasto"),
+                                                                       xml_kontakt->Attribute("NumerBudynku"),
+                                                                       xml_kontakt->Attribute("KodPocztowy"));
                                     }
                                     catch (exception ex)
                                     {
