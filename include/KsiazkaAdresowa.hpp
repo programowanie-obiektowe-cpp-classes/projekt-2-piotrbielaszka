@@ -45,7 +45,10 @@ public:
     string get_nazwisko() { return nazwisko; }
     string get_nazwa() { return (imie + " " + nazwisko); }
 
-    void add_Kontakt(shared_ptr< Kontakt > k) { dane_kontaktowe.push_back(k); }
+    void add_Kontakt(shared_ptr< Kontakt > k) { 
+        dane_kontaktowe.push_back(k);
+         }
+    void usun_kontkat(int n) { dane_kontaktowe.erase(dane_kontaktowe.begin() + n); }
 
     vector< shared_ptr< Kontakt > > get_dane_kontaktowe() { return dane_kontaktowe; }
 
@@ -55,6 +58,17 @@ public:
         for (shared_ptr< Kontakt > k : dane_kontaktowe)
         {
             k->print();
+        }
+    }
+
+    void print_kontakty()
+    {
+        int i = 0;
+        for (shared_ptr< Kontakt > k : dane_kontaktowe)
+        {
+            cout << "----" << i << "----\n";
+            k->print();
+            i++;
         }
     }
 
@@ -71,6 +85,10 @@ public:
     Osoba get_pozycja(int id) { return this->osoby[id]; }
 
     void new_pozycja(Osoba o) { osoby.push_back(o); }
+
+    void zmien_pozycje(int n, Osoba o) { *(osoby.begin() + n) = o; }
+
+    void usun_pozycje(int n) { osoby.erase(osoby.begin() + n); }
 
     void print_indeks_pozycji()
     {

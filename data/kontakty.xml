@@ -1,0 +1,13 @@
+<Osoby>
+    <Osoba Imie="Karol" Nazwisko="Bielaszka">
+        <Telefon>+48 123 456 789</Telefon>
+        <Email>karol.bielaszka@pw.edu.pl</Email>
+        <Adres Ulica="Sloneczna" Miasto="Warszawa" NumerBudynku="6" KodPocztowy="03-270"/>
+    </Osoba>
+    <Osoba Imie="Piotr" Nazwisko="Bielaszka">
+        <Telefon>+353 000 042 069</Telefon>
+        <Email>piotr.bielaszka@pw.edu.pl</Email>
+        <Adres Ulica="Stacyjna" Miasto="Warszawa" NumerBudynku="4" KodPocztowy="04-099"/>
+        <Faks>+48 228 787 854</Faks>
+    </Osoba>
+</Osoby>
