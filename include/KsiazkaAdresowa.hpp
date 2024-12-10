@@ -2,7 +2,6 @@
 
 #include "IntToString.hpp"
 #include "Kontakt.hpp"
-#include <algorithm>
 #include <iostream>
 #include <memory>
 #include <string>
@@ -16,55 +15,43 @@ class Osoba
 private:
     string                          imie;
     string                          nazwisko;
-    vector< shared_ptr< Kontakt > > dane_kontaktowe;
+    vector< unique_ptr< Kontakt > > dane_kontaktowe;
 
 public:
-    Osoba(string Imie, string Nazwisko, vector< shared_ptr< Kontakt > > DaneKontaktowe)
-        : imie(Imie), nazwisko(Nazwisko), dane_kontaktowe(DaneKontaktowe)
+    Osoba(string Imie, string Nazwisko, vector< unique_ptr< Kontakt > > DaneKontaktowe)
+        : imie(move(Imie)), nazwisko(move(Nazwisko)), dane_kontaktowe(move(DaneKontaktowe))
     {
         if (!sprawdz_poprawnosc())
             throw logic_error("Niepoprawne imie lub nazwisko");
     }
-    Osoba(string Imie, string Nazwisko) : imie(Imie), nazwisko(Nazwisko)
+    Osoba(string Imie, string Nazwisko) : imie(move(Imie)), nazwisko(move(Nazwisko))
     {
         if (!sprawdz_poprawnosc())
             throw logic_error("Niepoprawne imie lub nazwisko");
     }
 
-    Osoba() {}
+    Osoba() = default;
 
-    ~Osoba()
-    {
-        // for (Kontakt* k : dane_kontaktowe)
-        // {
-        //     delete(k);
-        // }
-    }
+    const string& get_imie() const { return imie; }
+    const string& get_nazwisko() const { return nazwisko; }
+    string        get_nazwa() const { return (imie + " " + nazwisko); }
 
-    string get_imie() { return imie; }
-    string get_nazwisko() { return nazwisko; }
-    string get_nazwa() { return (imie + " " + nazwisko); }
-
-    void add_Kontakt(shared_ptr< Kontakt > k) { 
-        dane_kontaktowe.push_back(k);
-         }
+    void add_Kontakt(unique_ptr< Kontakt > k) { dane_kontaktowe.push_back(move(k)); }
     void usun_kontkat(int n) { dane_kontaktowe.erase(dane_kontaktowe.begin() + n); }
 
-    vector< shared_ptr< Kontakt > > get_dane_kontaktowe() { return dane_kontaktowe; }
+    const vector< unique_ptr< Kontakt > >& get_dane_kontaktowe() const { return dane_kontaktowe; }
 
-    void print()
+    void print() const
     {
         cout << get_nazwa() << "\n";
-        for (shared_ptr< Kontakt > k : dane_kontaktowe)
-        {
+        for (const auto& k : dane_kontaktowe)
             k->print();
-        }
     }
 
-    void print_kontakty()
+    void print_kontakty() const
     {
         int i = 0;
-        for (shared_ptr< Kontakt > k : dane_kontaktowe)
+        for (const auto& k : dane_kontaktowe)
         {
             cout << "----" << i << "----\n";
             k->print();
@@ -81,27 +68,27 @@ private:
     vector< Osoba > osoby;
 
 public:
-    Osoba operator[](int id) { return osoby[id]; }
-    Osoba get_pozycja(int id) { return this->osoby[id]; }
+    const Osoba& operator[](int id) const { return osoby[id]; }
+    Osoba&       operator[](int id) { return osoby[id]; }
+    const Osoba& get_pozycja(int id) const { return this->osoby[id]; }
+    Osoba&       get_pozycja(int id) { return this->osoby[id]; }
 
-    void new_pozycja(Osoba o) { osoby.push_back(o); }
-
-    void zmien_pozycje(int n, Osoba o) { *(osoby.begin() + n) = o; }
+    void new_pozycja(Osoba o) { osoby.push_back(move(o)); }
 
     void usun_pozycje(int n) { osoby.erase(osoby.begin() + n); }
 
-    void print_indeks_pozycji()
+    void print_indeks_pozycji() const
     {
         int i = 0;
-        for (Osoba o : osoby)
+        for (const auto& o : osoby)
         {
             cout << i << ":\t" << o.get_nazwa() << "\n";
             i++;
         }
     }
-    void print_pozycje()
+    void print_pozycje() const
     {
-        for (Osoba o : osoby)
+        for (const auto& o : osoby)
         {
             o.print();
             cout << "\n";
@@ -114,12 +101,12 @@ public:
         XMLElement* root = doc.NewElement("Osoby");
         doc.InsertFirstChild(root);
         XMLElement* el;
-        for (Osoba o : osoby)
+        for (const auto& o : osoby)
         {
             el = doc.NewElement("Osoba");
             el->SetAttribute("Imie", o.get_imie().c_str());
             el->SetAttribute("Nazwisko", o.get_nazwisko().c_str());
-            for (shared_ptr< Kontakt > k : o.get_dane_kontaktowe())
+            for (const auto& k : o.get_dane_kontaktowe())
             {
                 el->InsertEndChild(k->getXML(root));
             }
@@ -140,8 +127,7 @@ public:
             {
                 XMLElement* xml_osoba = root->FirstChildElement();
                 XMLElement* xml_kontakt;
-                string      imie     = "";
-                string      nazwisko = "";
+                string      imie, nazwisko;
                 while (xml_osoba != nullptr)
                 {
                     xml_value = xml_osoba->Value();
@@ -154,7 +140,7 @@ public:
 
                         Osoba o     = Osoba(imie, nazwisko);
                         xml_kontakt = xml_osoba->FirstChildElement();
-                        shared_ptr< Kontakt > k;
+                        unique_ptr< Kontakt > k;
                         while (xml_kontakt != nullptr)
                         {
                             xml_value = xml_kontakt->Value();
@@ -162,7 +148,7 @@ public:
                             {
                                 try
                                 {
-                                    k = make_shared< Telefon >(xml_kontakt->GetText());
+                                    k = make_unique< Telefon >(xml_kontakt->GetText());
                                 }
                                 catch (exception ex)
                                 {
@@ -173,7 +159,7 @@ public:
                             {
                                 try
                                 {
-                                    k = make_shared< Email >(xml_kontakt->GetText());
+                                    k = make_unique< Email >(xml_kontakt->GetText());
                                 }
                                 catch (exception ex)
                                 {
@@ -184,7 +170,7 @@ public:
                             {
                                 try
                                 {
-                                    k = make_shared< Faks >(xml_kontakt->GetText());
+                                    k = make_unique< Faks >(xml_kontakt->GetText());
                                 }
                                 catch (exception ex)
                                 {
@@ -200,7 +186,7 @@ public:
                                 {
                                     try
                                     {
-                                        k = make_shared< AdresPolski >(xml_kontakt->Attribute("Ulica"),
+                                        k = make_unique< AdresPolski >(xml_kontakt->Attribute("Ulica"),
                                                                        xml_kontakt->Attribute("Miasto"),
                                                                        xml_kontakt->Attribute("NumerBudynku"),
                                                                        xml_kontakt->Attribute("KodPocztowy"));
@@ -211,10 +197,10 @@ public:
                                     }
                                 }
                             }
-                            o.add_Kontakt(k);
+                            o.add_Kontakt(move(k));
                             xml_kontakt = xml_kontakt->NextSiblingElement();
                         }
-                        osoby.push_back(o);
+                        osoby.push_back(move(o));
                     }
                     xml_osoba = xml_osoba->NextSiblingElement();
                 }

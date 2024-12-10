@@ -19,7 +19,7 @@ void print_help()
     cout << "exit - zamknij program\n";
 }
 
-shared_ptr< Kontakt > stworz_kontakt()
+unique_ptr< Kontakt > stworz_kontakt()
 {
     cout << "Wpisz typ kontaktu:\n";
     cout << "tel - nr. telefonu\n";
@@ -32,19 +32,19 @@ shared_ptr< Kontakt > stworz_kontakt()
     {
         cout << "Podaj nr. telefonu: ";
         cin >> in;
-        return make_shared< Telefon >(in);
+        return make_unique< Telefon >(in);
     }
     else if (in == "faks")
     {
         cout << "Podaj nr. faks: ";
         cin >> in;
-        return make_shared< Faks >(in);
+        return make_unique< Faks >(in);
     }
     else if (in == "email")
     {
         cout << "Podaj adres email: ";
         cin >> in;
-        return make_shared< Email >(in);
+        return make_unique< Email >(in);
     }
     else if (in == "adres")
     {
@@ -61,14 +61,14 @@ shared_ptr< Kontakt > stworz_kontakt()
         cout << "Podaj kod pocztowy: ";
         cin >> in;
 
-        return make_shared< AdresPolski >(ulica, miasto, numer, in);
+        return make_unique< AdresPolski >(ulica, miasto, numer, in);
     }
 }
 
 void zmien_pozycje(int n, KsiazkaAdresowa* ksiazka)
 {
     string in;
-    Osoba  o = ksiazka->get_pozycja(n);
+    Osoba& o = ksiazka->get_pozycja(n);
     o.print();
     cout << "\nimie - zmien imie\n";
     cout << "nazwisko - zmien nazwisko\n";
@@ -92,7 +92,6 @@ void zmien_pozycje(int n, KsiazkaAdresowa* ksiazka)
             o.usun_kontkat(n2);
         }
     }
-    ksiazka->zmien_pozycje(n, o);
 }
 
 int main()
@@ -140,7 +139,7 @@ int main()
             {
                 cout << "Niepoprawny kontakt!\n";
             }
-            ksiazka.new_pozycja(o);
+            ksiazka.new_pozycja(move(o));
         }
         else if (in == "ch")
         {
@@ -159,6 +158,6 @@ int main()
             ksiazka.usun_pozycje(n);
         }
         else if (in == "help")
-            print_help;
+            print_help();
     }
 }
